@@ -36,31 +36,31 @@ var async = require('async'),
       ],
       function(error) {
         fs.exists('bob', function(exists) {
-        var success,
-          eventErrorMessage;
-        if (error && error.message ===  git.GIT_NOOP_MESSAGE) {
-          logger.info('There was nothing new to commit.');
-          if (config.sendEventOnNoop !== 'true') {
-            logger.info('No DataDog event was sent.');
-            return callback();
+          var success,
+            eventErrorMessage;
+          if (error && error.message ===  git.GIT_NOOP_MESSAGE) {
+            logger.info('There was nothing new to commit.');
+            if (config.sendEventOnNoop !== 'true') {
+              logger.info('No DataDog event was sent.');
+              return callback();
+            }
+            eventErrorMessage = error.message;
+            // not a real error.  Get rid of it.
+            error = undefined;
+
+          } else if (error) {
+            logger.error('There was an error during the backup attempt.', error);
+            success = false;
+            eventErrorMessage = error.message;
+
+          } else {
+            success = true;
           }
-          eventErrorMessage = error.message;
-          // not a real error.  Get rid of it.
-          error = undefined;
-
-        } else if (error) {
-          logger.error('There was an error during the backup attempt.', error);
-          success = false;
-          eventErrorMessage = error.message;
-
-        } else {
-          success = true;
-        }
-        dataDog.sendDataDogEvent(success, eventErrorMessage, function() {
-          logger.debug('Event sent.');
-          callback(error);
-        })
-      });
+          dataDog.sendDataDogEvent(success, eventErrorMessage, function() {
+            logger.debug('Event sent.');
+            callback(error);
+          })
+        });
       });
   },
 
