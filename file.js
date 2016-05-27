@@ -18,49 +18,49 @@ var async = require('async'),
   /**
    * Get all boards and monitors from DataDog and check them into Git if necessary.
    */
-  performBackup = function(callback) {
-    async.waterfall(
-      [
-        async.apply(temp.mkdir, 'dog-watcher-work'),
-        function(dir, next) {
-          workDir = dir;
-          git.runCommand(['clone', config.gitRepoForBackups, workDir], workDir, next);
-        },
-        async.apply(dataDog.getBoards, 'dash'),
-        async.apply(dataDog.getBoards, 'screen'),
-        async.apply(dataDog.getMonitors),
+    performBackup = function(callback) {
+      async.waterfall(
+        [
+          async.apply(temp.mkdir, 'dog-watcher-work'),
+          function(dir, next) {
+            workDir = dir;
+            git.runCommand(['clone', config.gitRepoForBackups, workDir], workDir, next);
+          },
+          async.apply(dataDog.getBoards, 'dash'),
+          async.apply(dataDog.getBoards, 'screen'),
+          async.apply(dataDog.getMonitors),
 
-        async.apply(git.runCommand, ['add', '.']),
-        async.apply(git.runCommand, ['commit', '-m', 'Automatically committed by dog-watcher script']),
-        async.apply(git.runCommand, ['push', 'origin', 'master'])
-      ],
-      function(error) {
-        var success,
-          eventErrorMessage;
-        if (error && error.message ===  git.GIT_NOOP_MESSAGE) {
-          logger.info('There was nothing new to commit.');
-          if (config.sendEventOnNoop !== 'true') {
-            logger.info('No DataDog event was sent.');
-            return callback();
+          async.apply(git.runCommand, ['add', '.']),
+          async.apply(git.runCommand, ['commit', '-m', 'Automatically committed by dog-watcher script']),
+          async.apply(git.runCommand, ['push', 'origin', 'master'])
+        ],
+        function(error) {
+          var success,
+            eventErrorMessage;
+          if (error && error.message ===  git.GIT_NOOP_MESSAGE) {
+            logger.info('There was nothing new to commit.');
+            if (config.sendEventOnNoop !== 'true') {
+              logger.info('No DataDog event was sent.');
+              return callback();
+            }
+            eventErrorMessage = error.message;
+            // not a real error.  Get rid of it.
+            error = undefined;
+
+          } else if (error) {
+            logger.error('There was an error during the backup attempt.', error);
+            success = false;
+            eventErrorMessage = error.message;
+
+          } else {
+            success = true;
           }
-          eventErrorMessage = error.message;
-          // not a real error.  Get rid of it.
-          error = undefined;
-
-        } else if (error) {
-          logger.error('There was an error during the backup attempt.', error);
-          success = false;
-          eventErrorMessage = error.message;
-
-        } else {
-          success = true;
-        }
-        dataDog.sendDataDogEvent(success, eventErrorMessage, function() {
-          logger.debug('Event sent.');
-          callback(error);
-        })
-      });
-  },
+          dataDog.sendDataDogEvent(success, eventErrorMessage, function() {
+            logger.debug('Event sent.');
+            callback(error);
+          })
+        });
+    },
 
   /**
    * Perform the backup and clean up the work dir on completion.  At the end if there was a
