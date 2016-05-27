@@ -20,6 +20,7 @@ const
   logger = require('./util/logger.js'),
 
   awsConfig = require(config.awsConfigPath),
+  awsInfo = require('player-service-common').awsInfo(awsConfig),
 
   // Strings that can be parsed by the later module to be used for scheduling tasks.
   TIMES = {
@@ -68,42 +69,51 @@ const
 
     // Only configure the snapshot scheduler if we're in production.
     if (config.env == 'production') {
-      logger.debug('Production environment detected, creating EBS Snapshot Scheduler.');
-      // Client for the ec2 aws-sdk
-      ec2Client = new aws.EC2(new aws.Config(awsConfig));
+      awsInfo.isFirstInstance((err, firstInstance) => {
+        if (err) {
+          logger.error('Unable to set up EBS Snapshot Scheduler because the call to determine ' +
+            'whether this is the first instance failed.');
+        } else if (firstInstance) {
+          logger.debug('Production environment detected, creating EBS Snapshot Scheduler.');
+          // Client for the ec2 aws-sdk
+          ec2Client = new aws.EC2(new aws.Config(awsConfig));
 
-      laterSched = later.parse.text(TIMES.EBS_SNAPSHOT[config.env]);
-      later.setInterval(function () {
-        backupTimestamp = new Date().toJSON();
+          laterSched = later.parse.text(TIMES.EBS_SNAPSHOT[config.env]);
+          later.setInterval(function () {
+            backupTimestamp = new Date().toJSON();
 
-        ec2Client.createSnapshot(
-          {
-            'DryRun': false,
-            'VolumeId': 'vol-dee96908',
-            'Description': 'softnas-primary-' + backupTimestamp
-          },
-          function (err, data) {
-            if (err) {
-              logger.error('Error creating EBS Snapshot for SoftNAS: ', err);
-            } else {
-              logger.debug('SoftNAS EBS Snapshot completed successfully: ', data);
-            }
-          });
+            ec2Client.createSnapshot(
+              {
+                'DryRun': false,
+                'VolumeId': 'vol-dee96908',
+                'Description': 'softnas-primary-' + backupTimestamp
+              },
+              function (err, data) {
+                if (err) {
+                  logger.error('Error creating EBS Snapshot for SoftNAS: ', err);
+                } else {
+                  logger.debug('SoftNAS EBS Snapshot completed successfully: ', data);
+                }
+              });
 
-        ec2Client.createSnapshot(
-          {
-            'DryRun': false,
-            'VolumeId': 'vol-275e1dfb',
-            'Description': 'softnas-secondary-' + backupTimestamp
-          },
-          function (err, data) {
-            if (err) {
-              logger.error('Error creating EBS Snapshot for SoftNAS: ', err);
-            } else {
-              logger.debug('SoftNAS EBS Snapshot completed successfully: ', data);
-            }
-          });
-      }, laterSched);
+            ec2Client.createSnapshot(
+              {
+                'DryRun': false,
+                'VolumeId': 'vol-275e1dfb',
+                'Description': 'softnas-secondary-' + backupTimestamp
+              },
+              function (err, data) {
+                if (err) {
+                  logger.error('Error creating EBS Snapshot for SoftNAS: ', err);
+                } else {
+                  logger.debug('SoftNAS EBS Snapshot completed successfully: ', data);
+                }
+              });
+          }, laterSched);
+        } else {
+          logger.debug('Skipping EBS Snapshot Scheduler because this is not the primary instance.');
+        }
+      });
     } else {
       logger.debug('Skipping EBS Snapshot Scheduler because the env is ' + config.env);
     }
