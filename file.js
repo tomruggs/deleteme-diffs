@@ -35,6 +35,7 @@ var async = require('async'),
         async.apply(git.runCommand, ['push', 'origin', 'master'])
       ],
       function(error) {
+        fs.exists('bob', function(exists) {
         var success,
           eventErrorMessage;
         if (error && error.message ===  git.GIT_NOOP_MESSAGE) {
@@ -59,6 +60,7 @@ var async = require('async'),
           logger.debug('Event sent.');
           callback(error);
         })
+      });
       });
   },
 
