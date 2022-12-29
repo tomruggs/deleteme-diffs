@@ -17,8 +17,6 @@ jobs:
   test:
     steps:
       - name: Output stuff
-        show_dest: echo "Destination? ${{ inputs.destination }}"
-        show_iseu: echo "Is EU? ${{ inputs.destination == 'EU' && 'Yes' || 'No' }}"
-        show_isus: echo "Is US? ${{ inputs.destination == 'US' && 'Yes' || 'No' }}"
+        run: echo "Destination? ${{ inputs.destination }}"; echo "Is EU? ${{ inputs.destination == 'EU' && 'Yes' || 'No' }}"; echo "Is US? ${{ inputs.destination == 'US' && 'Yes' || 'No' }}"
 
 
