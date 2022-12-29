@@ -9,7 +9,9 @@ on:
         required: true
         default: 'US'
         options:
-          - 'EU'
+          - 'US'
+            'EU'
+            'Other'
 
 jobs:
   test:
