@@ -19,8 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Output stuff
-        run: echo "Destination? ${{ inputs.destination }}"; \
-             echo "Is EU? ${{ inputs.destination == 'EU' && 'Yes' || 'No' }}"; \
-             echo "Is US? ${{ inputs.destination == 'US' && 'Yes' || 'No' }}"
+        run: |
+          echo "Destination? ${{ inputs.destination }}"; \
+          echo "Is EU? ${{ inputs.destination == 'EU' && 'Yes' || 'No' }}"; \
+          echo "Is US? ${{ inputs.destination == 'US' && 'Yes' || 'No' }}"
 
 
