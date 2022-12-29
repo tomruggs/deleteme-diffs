@@ -1,0 +1,22 @@
+name: Do It
+
+on:
+  workflow_dispatch:
+    inputs:
+      destination:
+        type: choice
+        description: Where we want to deploy (US or EU).
+        required: true
+        default: 'US'
+        options:
+          - 'EU'
+
+jobs:
+  test:
+    steps:
+      - name: Output stuff
+        run: echo "Destination? ${{ inputs.destination }}"
+        run: echo "Is EU? ${{ inputs.destination == 'EU' && 'Yes' || 'No' }}"
+        run: echo "Is EU? ${{ inputs.destination == 'EU' && 'Yes' || 'No' }}"
+
+
