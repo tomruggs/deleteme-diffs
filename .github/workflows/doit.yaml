@@ -10,8 +10,8 @@ on:
         default: 'US'
         options:
           - 'US'
-            'EU'
-            'Other'
+          - 'EU'
+          - 'Other'
 
 jobs:
   test:
