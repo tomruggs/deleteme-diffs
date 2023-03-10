@@ -1,0 +1,52 @@
+name: Deploy to Lambda
+
+on:
+  workflow_call:
+    inputs:
+      region:
+        description: The region we want to deploy to.
+        required: true
+        type: string
+      environment:
+        description: The environment to deploy to.
+        required: true
+        type: string
+      is_eu:
+        description: True if deploying to EU.
+        required: false
+        type: boolean
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish_lambda:
+    name: Publish Lambda source code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ inputs.region }}
+          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
+          role-skip-session-tagging: true
+          function_name:
+
+      - name: Set Lambda function name
+        run:
+          env:
+            function_name: insights-kick-off-data-ingestion-${{ inputs.environment }}
+
+      - name: Amend Lambda function name for EU (if applicable)
+        if: "${{ github.event.inputs.is_eu == 'true' }}"
+        run:
+          env:
+            function_name: {{ function_name }}-eu
+
+      - name: Publish
+        run: |
+          echo {{ function_name }}
