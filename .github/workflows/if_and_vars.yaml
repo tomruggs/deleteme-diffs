@@ -28,6 +28,6 @@ jobs:
 
       - name: Publish
         run: |
-          echo ${{ super_region }}
+          echo "$super_region"
         env:
           super_region: "${{ inputs.region }} is super"
