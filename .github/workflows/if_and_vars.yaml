@@ -15,10 +15,6 @@ on:
         description: True if deploying to EU.
         required: false
         type: boolean
-      super_region:
-        description: The region + super
-        required: false
-        default: "${{ inputs.region }} is super"
 
 permissions:
   id-token: write
@@ -32,4 +28,6 @@ jobs:
 
       - name: Publish
         run: |
-          echo ${{ inputs.super_region }}
+          echo ${{ super_region }}
+        env:
+          super_region: "${{ inputs.region }} is super"
