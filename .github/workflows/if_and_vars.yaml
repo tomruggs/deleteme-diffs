@@ -35,4 +35,4 @@ jobs:
       - name: Publish Again
         run: |
           echo "region ${{ inputs.region }}"
-          echo "super_region ${{ super_region }}"
+          echo "super_region ${{ inputs.super_region }}"
