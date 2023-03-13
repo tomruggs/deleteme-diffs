@@ -18,7 +18,7 @@ on:
       super_region:
         description: The region + super
         required: false
-        default: "${{inputs.region}} is super"
+        default: "${{ inputs.region }} is super"
 
 permissions:
   id-token: write
