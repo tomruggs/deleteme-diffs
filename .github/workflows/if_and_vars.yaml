@@ -15,6 +15,10 @@ on:
         description: True if deploying to EU.
         required: false
         type: boolean
+      super_region:
+        description: The region + super
+        required: false
+        default: "${{inputs.region}} is super"
 
 permissions:
   id-token: write
