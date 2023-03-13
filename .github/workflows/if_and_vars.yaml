@@ -49,8 +49,8 @@ jobs:
         if: "${{ github.event.inputs.is_eu == 'true' }}"
         run:
           env:
-            function_name: {{ function_name }}-eu
+            function_name: "${{ function_name }}-eu"
 
       - name: Publish
         run: |
-          echo {{ function_name }}
+          echo ${{ function_name }}
